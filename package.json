@@ -1,0 +1,39 @@
+{
+  "name": "@infrasynctech/infra-kit",
+  "version": "1.4.1",
+  "description": "AI-ready infrastructure scaffolding for bare metal servers",
+  "bin": {
+    "infra-kit": "./bin/cli.js"
+  },
+  "main": "src/index.js",
+  "type": "commonjs",
+  "files": [
+    "bin",
+    "src",
+    "templates",
+    "README.md"
+  ],
+  "scripts": {
+    "dev": "node bin/cli.js",
+    "test": "node bin/cli.js --help"
+  },
+  "keywords": [
+    "devops",
+    "claude",
+    "mcp",
+    "infrastructure",
+    "hetzner",
+    "ai-agent"
+  ],
+  "author": "infrasynctech",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "commander": "^12.0.0",
+    "fs-extra": "^11.2.0",
+    "handlebars": "^4.7.8",
+    "inquirer": "^8.2.6",
+    "ora": "^5.4.1",
+    "ssh2": "^1.15.0"
+  }
+}

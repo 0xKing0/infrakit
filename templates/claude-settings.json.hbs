@@ -1,0 +1,50 @@
+{
+  "mcpServers": {
+    "ssh-{{project}}": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "ssh-mcp",
+        "--",
+        "--host={{server.ip}}",
+        "--port={{server.port}}",
+        "--user={{server.user}}",
+        {{#if server.keyPath}}"--key={{server.keyPath}}"{{else}}"--password=${SSH_PASSWORD}"{{/if}}
+      ]
+    }
+  },
+  "permissions": {
+    "allow": [
+      "Bash(docker service ls*)",
+      "Bash(docker service logs*)",
+      "Bash(docker service update --force*)",
+      "Bash(docker service scale*)",
+      "Bash(docker system prune -f)",
+      "Bash(docker ps*)",
+      "Bash(df -h*)",
+      "Bash(free -h*)",
+      "Bash(uptime*)",
+      "Bash(cat /root/.context/{{project}}/*)",
+      "Bash(cat /root/.context/INDEX.md)",
+      "Bash(echo * >> /root/.context/{{project}}/CHANGELOG.md)",
+      "Bash(find /opt/{{project}}*)",
+      "Bash(curl -X POST http://localhost:8000/api/v1/webhooks/*)"
+    ],
+    "deny": [
+      "Bash(rm -rf /opt/{{project}}/db/*)",
+      "Bash(cat */.env*)",
+      "Bash(docker compose down*)",
+      "Bash(docker service scale *=0)"
+    ]
+  },
+  "contextFiles": [
+    ".infra/SKILL.md",
+    ".infra/SERVER.md"
+  ],
+  "env": {
+    "INFRA_KIT_PROJECT": "{{project}}",
+    "INFRA_KIT_SERVER_IP": "{{server.ip}}",
+    "INFRA_KIT_VERSION": "{{infraKitVersion}}",
+    "INFRA_KIT_CONTEXT_PATH": "/root/.context/{{project}}/SERVER.md"
+  }
+}
