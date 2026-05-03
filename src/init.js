@@ -61,7 +61,7 @@ async function init() {
     // Copy skills
     const skillsSrc = path.join(TEMPLATES_DIR, 'skills');
     fs.copySync(skillsSrc, SKILLS_DIR);
-    spinner.succeed(chalk.green(`${SKILLS_DIR}/ (15 skills installed)`));
+    spinner.succeed(chalk.green(`${SKILLS_DIR}/ (16 skills installed)`));
 
     // .claude/settings.json
     const settingsConfig = {
@@ -77,7 +77,8 @@ async function init() {
 
     console.log(chalk.bold.green('\n✅ Scaffolding complete\n'));
     console.log(chalk.bold('  Available commands:'));
-    console.log(chalk.cyan('    /infra-setup       ') + chalk.gray('— configure server and services'));
+    console.log(chalk.cyan('    /infra-bootstrap   ') + chalk.gray('— provision a fresh server (Docker, Swarm, Coolify)'));
+    console.log(chalk.cyan('    /infra-setup       ') + chalk.gray('— configure infra-kit for this project'));
     console.log(chalk.cyan('    /infra-status      ') + chalk.gray('— health check'));
     console.log(chalk.cyan('    /infra-logs        ') + chalk.gray('— service logs'));
     console.log(chalk.cyan('    /infra-scale       ') + chalk.gray('— scale a service'));
@@ -86,7 +87,8 @@ async function init() {
     console.log(chalk.cyan('    /infra-doctor      ') + chalk.gray('— diagnose issues'));
     console.log('');
     console.log(chalk.bold('  Next step:'));
-    console.log(chalk.cyan('    Open Claude Code and type: /infra-setup'));
+    console.log(chalk.cyan('    Open Claude Code and type: /infra-bootstrap') + chalk.gray('  (fresh server)'));
+    console.log(chalk.cyan('                            or: /infra-setup    ') + chalk.gray('  (server already prepared)'));
     console.log('');
 
   } catch (err) {

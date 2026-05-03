@@ -1,39 +1,65 @@
 ---
 name: infra-status
-description: Check server health — services, disk, RAM, backups. Use when asked about server status or health.
+description: Full health check of the project's services on the server — replicas, disk, RAM, recent log errors, last backup. Use whenever the user says "status", "is everything ok", "health check", "how's prod", "check the server", "any errors", "what's broken", or asks for a quick overview of service health.
+argument-hint: [env]
 ---
 
-# Health Check
+# Health check
+
+Report on the project running in env `$1` (default `production`).
+
+## 1. Read local config
 
 ```bash
 cat .infra/config.json
-docker service ls | grep $INFRA_KIT_PROJECT
+```
+
+Note service names and the `scaling`/`backup` settings.
+
+## 2. Server snapshot (server shell)
+
+```bash
+docker service ls | grep "$INFRA_KIT_PROJECT" || echo "(no services)"
 df -h /
 free -h
 docker system df
 find /opt/$INFRA_KIT_PROJECT/db/backups/ -mtime -1 -name "*.dump" 2>/dev/null | head -5
 ```
 
-For each service, check recent logs for errors:
+## 3. Per-service log scan (server shell)
+
+For each service in the config, sample recent logs and grep for error signatures:
+
 ```bash
-docker service logs {service} --tail 20 --timestamps 2>&1 | tail -20
+docker service logs ${INFRA_KIT_PROJECT}_{service} --tail 50 --timestamps 2>&1 \
+  | grep -iE "error|fatal|panic|exception|stalled|OOMKilled|ECONNREFUSED" \
+  | tail -10
 ```
 
-Report:
+## 4. Report
+
+Use this format:
 
 ```
-## Health Check — {project}
+## {project} — {env}
 
-**Services:**
-- {service}: {replicas} ✅/❌
+Services
+- {service}: {replicas} {glyph}
 
-**System:**
-- Disk: {used}/{total} ({percent})
-- RAM: {used}/{total}
-- Last backup: {timestamp} or ⚠️ MISSING
+System
+- Disk: {used}/{total} ({pct})
+- RAM:  {used}/{total}
+- Last backup: {ts} or ⚠️ MISSING
 
-**Issues:** {list or "None"}
-**Recommended actions:** {list or "None"}
+Issues
+- {one line each, or "None"}
+
+Recommended
+- {action} or "None"
 ```
 
-If any service at 0/N → take autonomous action per infra-ops rules.
+## 5. Act on autonomous triggers
+
+If anything in the report matches an autonomous trigger from `infra-ops` (service at 0/N, disk >80%, worker stalled, backup missing >24h), **act on it now**, then add the action to the report.
+
+For gated triggers (scale, deploy, rollback, migration), do **not** act — list them under "Recommended".

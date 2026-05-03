@@ -1,32 +1,55 @@
 ---
 name: infra-rollback
-description: Rollback a service to its previous version. Ask for confirmation before rolling back.
-argument-hint: [service]
-disable-model-invocation: true
+description: Roll a service back to its previous Docker Swarm spec. Use whenever the user says "rollback", "roll back", "revert the deploy", "undo the release", "go back to the previous version", "rollback {service}", or asks to restore a service to its prior state. Always confirms by showing current vs. previous image before acting.
+argument-hint: <service> [env]
 ---
 
-# Rollback Service
+# Rollback a service
 
-1. Show current vs previous:
+Roll `$1` (env `$2`, default `production`) back to its previous Swarm spec. Gated action — see `infra-ops`.
+
+## 1. Show current vs previous (server shell)
+
 ```bash
-docker service inspect $ARGUMENTS --format "{{.Spec.TaskTemplate.ContainerSpec.Image}}"
-docker service inspect $ARGUMENTS --format "{{.PreviousSpec.TaskTemplate.ContainerSpec.Image}}"
+SVC="${INFRA_KIT_PROJECT}_$1"
+docker service inspect "$SVC" --format \
+  'current : {{.Spec.TaskTemplate.ContainerSpec.Image}}
+previous: {{.PreviousSpec.TaskTemplate.ContainerSpec.Image}}'
 ```
 
-2. Ask: "Rollback $ARGUMENTS from {current} to {previous}?"
+If `previous` is empty, **stop**. There is nothing to roll back to. Report this and recommend `/infra-deploy` with a known-good image instead.
 
-3. After confirmation:
+## 2. Confirm
+
+> Rollback **$1** in **$2** from `{current}` to `{previous}`?
+
+Wait for explicit yes.
+
+## 3. Roll back (server shell)
+
 ```bash
-docker service rollback $ARGUMENTS
+docker service rollback "${INFRA_KIT_PROJECT}_$1"
 ```
 
-4. Verify:
+## 4. Verify (server shell)
+
 ```bash
-docker service ls | grep $ARGUMENTS
-docker service logs $ARGUMENTS --tail 20 --timestamps
+docker service ls --filter name=${INFRA_KIT_PROJECT}_$1
+docker service logs ${INFRA_KIT_PROJECT}_$1 --tail 30 --timestamps
 ```
 
-5. Log:
+If replicas don't recover within ~30s, follow the **Service down** playbook in `infra-ops`.
+
+## 5. Log
+
 ```bash
-echo "- $(date -u +%Y-%m-%dT%H:%M:%SZ): Rolled back $ARGUMENTS" >> /root/.context/$INFRA_KIT_PROJECT/CHANGELOG.md
+echo "- $(date -u +%Y-%m-%dT%H:%M:%SZ): Rolled back $1 in $2" >> /root/.context/$INFRA_KIT_PROJECT/CHANGELOG.md
 ```
+
+```bash
+echo "- $(date -u +%Y-%m-%dT%H:%M:%SZ): Rolled back $1 in $2" >> .infra/CHANGELOG.md
+```
+
+## 6. Report
+
+Status glyph + replicas + the image now running.

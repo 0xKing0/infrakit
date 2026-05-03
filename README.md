@@ -8,18 +8,20 @@ AI-ready infrastructure scaffolding — Claude Code skills for bare metal server
 npx @infrasynctech/infra-kit init
 ```
 
-This installs 15 Claude Code skills into `.claude/skills/`. Then open Claude Code:
+This installs 16 Claude Code skills into `.claude/skills/`. Then open Claude Code:
 
 ```
-/infra-setup
+/infra-bootstrap   # fresh server — installs Docker, Swarm, Coolify, ufw
+/infra-setup       # then configure infra-kit for this project
 ```
 
-Claude analyzes your project, asks for server details, and configures everything.
+Use `/infra-bootstrap` if the server is brand new and has nothing on it yet. Skip it and go straight to `/infra-setup` if Docker and Coolify are already running.
 
 After setup, use slash commands or just talk naturally:
 
 | Command | What it does |
 |---|---|
+| `/infra-bootstrap` | Provision a fresh server |
 | `/infra-status` | Full health check |
 | `/infra-logs api` | Service logs |
 | `/infra-scale api 3` | Scale a service |
@@ -45,6 +47,7 @@ Or just say "check the server", "show me the logs", "scale up the worker" — Cl
 ├── settings.json                  ← SSH MCP + permissions
 └── skills/
     ├── infra-ops/SKILL.md         ← background rules (auto-loaded)
+    ├── infra-bootstrap/SKILL.md   ← /infra-bootstrap (fresh server)
     ├── infra-setup/SKILL.md       ← /infra-setup
     ├── infra-status/SKILL.md      ← /infra-status
     ├── infra-logs/SKILL.md        ← /infra-logs
